@@ -95,14 +95,36 @@ begin
 	-- CONCURRENT STATEMENTS ------------------------------------------------------------------------------
 	
 	-- Next State Logic
+	f_Q_next <= s_floor2 when (f_Q = s_floor1 and i_up_down = '1') else -- going up
+	            s_floor3 when (f_Q = s_floor2 and i_up_down = '1') else
+	            s_floor4 when (f_Q = s_floor3 and i_up_down = '1') else
+	            s_floor3 when (f_Q = s_floor4 and i_up_down = '0') else -- going down
+	            s_floor2 when (f_Q = s_floor3 and i_up_down = '0') else
+	            f_Q; -- default case
   
 	-- Output logic
+	with f_Q select
+    o_floor <= "0001" when s_floor1,
+               "0010" when s_floor2,
+               "0100" when s_floor3,
+               "1000" when s_floor4,
+               "0010" when others; -- default is floor2
 
 	-------------------------------------------------------------------------------------------------------
 	
 	-- PROCESSES ------------------------------------------------------------------------------------------	
 	
 	-- State register ------------
+	process(i_clk)
+	begin
+	   if (rising_edge(i_clk)) then 
+	       if i_reset = '1' then
+	           f_Q <= s_floor2; --reset
+	       elsif i_reset = '0' then
+	           f_Q <= f_Q_next; --update state 
+	       end if;
+	   end if;
+    end process;
 	
 	
 	-------------------------------------------------------------------------------------------------------
